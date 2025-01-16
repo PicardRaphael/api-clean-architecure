@@ -5,7 +5,7 @@ import {
 } from '../../../../core/ports/database.port';
 import { AppDataSource, isInitialized } from '../data-source';
 import BookDBEntity from './book.entity';
-export class TypeORMBookRepository implements BookRepository {
+class TypeORMBookRepository implements BookRepository {
   async findById(id: string): Promise<Book | null> {
     await isInitialized();
     const book = await AppDataSource.getRepository(BookDBEntity).findOne({
@@ -86,3 +86,4 @@ export class TypeORMBookRepository implements BookRepository {
     return books.map((book) => book.toDomainEntity());
   }
 }
+export default TypeORMBookRepository;

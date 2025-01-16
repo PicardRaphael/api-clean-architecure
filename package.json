@@ -7,8 +7,8 @@
     "build": "tsoa spec-and-routes",
     "dev": "concurrently 'nodemon' 'nodemon -x tsoa spec-and-routes'",
     "lint": "prettier --check .",
-    "typeorm": "env-cmd typeorm-ts-node-commonjs",
-    "test": "jest --runInBand --coverage"
+    "test": "jest --runInBand",
+    "typeorm": "env-cmd typeorm-ts-node-commonjs"
   },
   "keywords": [],
   "author": "",
