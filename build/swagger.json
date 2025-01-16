@@ -7,6 +7,49 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"SigninParam": {
+				"type": "string"
+			},
+			"SignupParam": {
+				"properties": {
+					"password": {
+						"type": "string"
+					},
+					"login": {
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"Book": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"title": {
+						"type": "string"
+					},
+					"summary": {
+						"type": "string"
+					},
+					"author": {
+						"type": "string"
+					},
+					"totalPages": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"id",
+					"title",
+					"summary",
+					"author",
+					"totalPages"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"CreateBookParams": {
 				"properties": {
 					"totalPages": {
@@ -26,7 +69,13 @@
 				"type": "object"
 			}
 		},
-		"securitySchemes": {}
+		"securitySchemes": {
+			"jwt": {
+				"type": "http",
+				"scheme": "bearer",
+				"bearerFormat": "JWT"
+			}
+		}
 	},
 	"info": {
 		"title": "boilerplate-clean-architecture",
@@ -37,6 +86,94 @@
 		"contact": {}
 	},
 	"paths": {
+		"/users/signin": {
+			"post": {
+				"operationId": "Signin",
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"accessToken": {
+											"type": "string"
+										}
+									},
+									"type": "object"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid request params"
+					},
+					"404": {
+						"description": "Not found"
+					}
+				},
+				"summary": "Signin user",
+				"tags": [
+					"Users"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SigninParam"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/users/signup": {
+			"post": {
+				"operationId": "Signup",
+				"responses": {
+					"201": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"accessToken": {
+											"type": "string"
+										}
+									},
+									"type": "object"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid request params"
+					},
+					"409": {
+						"description": "Already exists"
+					}
+				},
+				"summary": "Signup user",
+				"tags": [
+					"Users"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SignupParam"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/books": {
 			"get": {
 				"operationId": "List",
@@ -45,7 +182,30 @@
 						"description": "",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"items": {
+										"properties": {
+											"totalPages": {
+												"type": "number",
+												"format": "double"
+											},
+											"author": {
+												"type": "string"
+											},
+											"summary": {
+												"type": "string"
+											},
+											"title": {
+												"type": "string"
+											},
+											"id": {
+												"type": "string"
+											}
+										},
+										"type": "object"
+									},
+									"type": "array"
+								}
 							}
 						}
 					}
@@ -54,13 +214,57 @@
 				"tags": [
 					"Books"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": []
 			},
 			"post": {
 				"operationId": "Create",
 				"responses": {
 					"201": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Book"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid request params"
+					}
+				},
+				"summary": "Create book",
+				"tags": [
+					"Books"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateBookParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/books/{id}": {
+			"get": {
+				"operationId": "GetById",
+				"responses": {
+					"200": {
 						"description": "",
 						"content": {
 							"application/json": {
@@ -83,60 +287,30 @@
 											"type": "string"
 										}
 									},
-									"required": [
-										"totalPages",
-										"author",
-										"summary",
-										"title",
-										"id"
-									],
 									"type": "object"
 								}
 							}
 						}
+					},
+					"400": {
+						"description": "Invalid book id format"
+					},
+					"404": {
+						"description": "Not found"
 					}
 				},
-				"summary": "Create book",
+				"summary": "Get a book by id",
 				"tags": [
 					"Books"
 				],
-				"security": [],
-				"parameters": [],
-				"requestBody": {
-					"description": "The book's data",
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/CreateBookParams",
-								"description": "The book's data"
-							}
-						}
+				"security": [
+					{
+						"jwt": []
 					}
-				}
-			}
-		},
-		"/books/{id}": {
-			"get": {
-				"operationId": "GetById",
-				"responses": {
-					"200": {
-						"description": "",
-						"content": {
-							"application/json": {
-								"schema": {}
-							}
-						}
-					}
-				},
-				"summary": "Get book by id",
-				"tags": [
-					"Books"
 				],
-				"security": [],
 				"parameters": [
 					{
-						"description": "The book's indentifier",
+						"description": "The book's identifier",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -150,22 +324,27 @@
 				"operationId": "Delete",
 				"responses": {
 					"204": {
-						"description": "",
-						"content": {
-							"application/json": {
-								"schema": {}
-							}
-						}
+						"description": ""
+					},
+					"400": {
+						"description": "Invalid book id format"
+					},
+					"404": {
+						"description": "Not found"
 					}
 				},
-				"summary": "Delete book by id",
+				"summary": "Delete book",
 				"tags": [
 					"Books"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
-						"description": "The book's indentifier",
+						"description": "The book's identifier",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -179,7 +358,7 @@
 	},
 	"servers": [
 		{
-			"url": "http://localhost:8000",
+			"url": "http://localhost:8001",
 			"description": "Localhost"
 		}
 	]
